@@ -33,19 +33,19 @@ PID算法的Simulink仿真如下：
 
 1. 加入Kp = 2比例控制；
 
-![](./image/Simulink仿真/PID算法 Kp=2.png)
+![](./image/Simulink仿真/PID算法Kp=2.png)
 
 2. 增大Kp至62；
 
-![](./image/Simulink仿真/PID算法 kp=62.png)
+![](./image/Simulink仿真/PID算法kp=62.png)
 
 3. 出现震荡之后，加入微分参数Kd = 30；
 
-![](./image/Simulink仿真/PID算法 Kp=65 Kd=30.png)
+![](./image/Simulink仿真/PID算法Kp=65、Kd=30.png)
 
 4. 最后加入积分参数Ki = 30；
 
-![](./image/Simulink仿真/PID算法 Kp=65 Ki=30 Kd=30.png)
+![](./image/Simulink仿真/PID算法Kp=65、Ki=30、Kd=30.png)
 
 ### 卡尔曼滤波仿真
 
