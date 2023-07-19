@@ -381,11 +381,6 @@
               <FilePath>..\..\App\Src\control.c</FilePath>
             </File>
             <File>
-              <FileName>DataScope_DP.C</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\App\Src\DataScope_DP.C</FilePath>
-            </File>
-            <File>
               <FileName>filter.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\App\Src\filter.c</FilePath>
@@ -409,6 +404,11 @@
               <FileName>show.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\App\Src\show.c</FilePath>
+            </File>
+            <File>
+              <FileName>pid.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\App\Src\pid.c</FilePath>
             </File>
           </Files>
         </Group>

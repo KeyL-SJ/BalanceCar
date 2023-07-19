@@ -7,51 +7,107 @@ Output  : none
 入口参数：加速度获取的角度、角速度
 返回  值：x轴角速度
 **************************************************************************/
-float dt = 0.005; // 每5ms进行一次滤波
-float Kalman_Filter(float Accel, float Gyro)
+KalmaTypeDef Kalman;
+
+void kalman_filter_init(void)
 {
-    static float angle_dot;
-    static float angle;
-    float Q_angle = 0.001; // 过程噪声的协方差
-    float Q_gyro = 0.003;  // 0.003 过程噪声的协方差 过程噪声的协方差为一个一行两列矩阵
-    float R_angle = 0.5;   // 测量噪声的协方差 既测量偏差
-    char C_0 = 1;
-    static float Q_bias, Angle_err;
-    static float PCt_0, PCt_1, E;
-    static float K_0, K_1, t_0, t_1;
-    static float Pdot[4] = {0, 0, 0, 0};
-    static float PP[2][2] = {{1, 0}, {0, 1}};
-    angle += (Gyro - Q_bias) * dt;           // 先验估计
-    Pdot[0] = Q_angle - PP[0][1] - PP[1][0]; // Pk-先验估计误差协方差的微分
+    Kalman.Q_angle_x = 0.001;
+    Kalman.Q_gyro_x = 0.003;
+    Kalman.R_angle_x = 0.5;
+    Kalman.C_0_x = 1;
+    Kalman.Pdot_x[0] = 0;
+    Kalman.Pdot_x[1] = 0;
+    Kalman.Pdot_x[2] = 0;
+    Kalman.Pdot_x[3] = 0;
+    Kalman.PP_x[0][0] = 1;
+    Kalman.PP_x[0][1] = 0;
+    Kalman.PP_x[1][0] = 0;
+    Kalman.PP_x[1][1] = 1;
+    Kalman.dt_x= 0.005;
+    
+    Kalman.Q_angle_y = 0.001;
+    Kalman.Q_gyro_y = 0.003;
+    Kalman.R_angle_y = 0.5;
+    Kalman.C_0_y = 1;
+    Kalman.Pdot_y[0] = 0;
+    Kalman.Pdot_y[1] = 0;
+    Kalman.Pdot_y[2] = 0;
+    Kalman.Pdot_y[3] = 0;
+    Kalman.PP_y[0][0] = 1;
+    Kalman.PP_y[0][1] = 0;
+    Kalman.PP_y[1][0] = 0;
+    Kalman.PP_y[1][1] = 1;
+    Kalman.dt_y = 0.005;
+}
 
-    Pdot[1] = -PP[1][1];
-    Pdot[2] = -PP[1][1];
-    Pdot[3] = Q_gyro;
-    PP[0][0] += Pdot[0] * dt; // Pk-先验估计误差协方差微分的积分
-    PP[0][1] += Pdot[1] * dt; // =先验估计误差协方差
-    PP[1][0] += Pdot[2] * dt;
-    PP[1][1] += Pdot[3] * dt;
+float Kalman_Filter_x(float Accel, float Gyro)
+{
+    Kalman.angle_x += (Gyro - Kalman.Q_bias_x) * Kalman.dt_x;           // 先验估计
+    Kalman.Pdot_x[0] = Kalman.Q_angle_x - Kalman.PP_x[0][1] - Kalman.PP_x[1][0]; // Pk-先验估计误差协方差的微分
 
-    Angle_err = Accel - angle; // zk-先验估计
+    Kalman.Pdot_x[1] = -Kalman.PP_x[1][1];
+    Kalman.Pdot_x[2] = -Kalman.PP_x[1][1];
+    Kalman.Pdot_x[3] = Kalman.Q_gyro_x;
+    Kalman.PP_x[0][0] += Kalman.Pdot_x[0] * Kalman.dt_x; // Pk-先验估计误差协方差微分的积分
+    Kalman.PP_x[0][1] += Kalman.Pdot_x[1] * Kalman.dt_x; // =先验估计误差协方差
+    Kalman.PP_x[1][0] += Kalman.Pdot_x[2] * Kalman.dt_x;
+    Kalman.PP_x[1][1] += Kalman.Pdot_x[3] * Kalman.dt_x;
 
-    PCt_0 = C_0 * PP[0][0];
-    PCt_1 = C_0 * PP[1][0];
+    Kalman.Angle_err_x = Accel - Kalman.angle_x; // zk-先验估计
 
-    E = R_angle + C_0 * PCt_0;
+    Kalman.PCt_0_x = Kalman.C_0_x * Kalman.PP_x[0][0];
+    Kalman.PCt_1_x = Kalman.C_0_x * Kalman.PP_x[1][0];
 
-    K_0 = PCt_0 / E;
-    K_1 = PCt_1 / E;
+    Kalman.E_x = Kalman.R_angle_x + Kalman.C_0_x * Kalman.PCt_0_x;
 
-    t_0 = PCt_0;
-    t_1 = C_0 * PP[0][1];
+    Kalman.K_0_x = Kalman.PCt_0_x / Kalman.E_x;
+    Kalman.K_1_x = Kalman.PCt_1_x / Kalman.E_x;
 
-    PP[0][0] -= K_0 * t_0; // 后验估计误差协方差
-    PP[0][1] -= K_0 * t_1;
-    PP[1][0] -= K_1 * t_0;
-    PP[1][1] -= K_1 * t_1;
+    Kalman.t_0_x = Kalman.PCt_0_x;
+    Kalman.t_1_x = Kalman.C_0_x * Kalman.PP_x[0][1];
 
-    angle += K_0 * Angle_err;  // 后验估计
-    Q_bias += K_1 * Angle_err; // 后验估计
-    angle_dot = Gyro - Q_bias; // 输出值(后验估计)的微分=角速度
-    return angle;
+    Kalman.PP_x[0][0] -= Kalman.K_0_x * Kalman.t_0_x; // 后验估计误差协方差
+    Kalman.PP_x[0][1] -= Kalman.K_0_x * Kalman.t_1_x;
+    Kalman.PP_x[1][0] -= Kalman.K_1_x * Kalman.t_0_x;
+    Kalman.PP_x[1][1] -= Kalman.K_1_x * Kalman.t_1_x;
+
+    Kalman.angle_x += Kalman.K_0_x * Kalman.Angle_err_x;  // 后验估计
+    Kalman.Q_bias_x += Kalman.K_1_x * Kalman.Angle_err_x; // 后验估计
+    return Kalman.angle_x;
+}
+
+float Kalman_Filter_y(float Accel,float Gyro)		
+{
+	Kalman.angle_y += (Gyro - Kalman.Q_bias_y) * Kalman.dt_y; //先验估计
+	Kalman.Pdot_y[0] = Kalman.Q_angle_y - Kalman.PP_y[0][1] - Kalman.PP_y[1][0]; // Pk-先验估计误差协方差的微分
+	Kalman.Pdot_y[1] = -Kalman.PP_y[1][1];
+	Kalman.Pdot_y[2] = -Kalman.PP_y[1][1];
+	Kalman.Pdot_y[3] = Kalman.Q_gyro_y;
+
+	Kalman.PP_y[0][0] += Kalman.Pdot_y[0] * Kalman.dt_y;   // Pk-先验估计误差协方差微分的积分
+	Kalman.PP_y[0][1] += Kalman.Pdot_y[1] * Kalman.dt_y;   // =先验估计误差协方差
+	Kalman.PP_y[1][0] += Kalman.Pdot_y[2] * Kalman.dt_y;
+	Kalman.PP_y[1][1] += Kalman.Pdot_y[3] * Kalman.dt_y;
+
+	Kalman.Angle_err_y = Accel - Kalman.angle_y;	//zk-先验估计
+	
+	Kalman.PCt_0_y = Kalman.C_0_y * Kalman.PP_y[0][0];
+	Kalman.PCt_1_y = Kalman.C_0_y * Kalman.PP_y[1][0];
+	
+	Kalman.E_y = Kalman.R_angle_y + Kalman.C_0_y * Kalman.PCt_0_y;
+	
+	Kalman.K_0_y = Kalman.PCt_0_y / Kalman.E_y;
+	Kalman.K_1_y = Kalman.PCt_1_y / Kalman.E_y;
+	
+	Kalman.t_0_y = Kalman.PCt_0_y;
+	Kalman.t_1_y = Kalman.C_0_y * Kalman.PP_y[0][1];
+
+	Kalman.PP_y[0][0] -= Kalman.K_0_y * Kalman.t_0_y;		 //后验估计误差协方差
+	Kalman.PP_y[0][1] -= Kalman.K_0_y * Kalman.t_1_y;
+	Kalman.PP_y[1][0] -= Kalman.K_1_y * Kalman.t_0_y;
+	Kalman.PP_y[1][1] -= Kalman.K_1_y * Kalman.t_1_y;
+		
+	Kalman.angle_y += Kalman.K_0_y * Kalman.Angle_err_y;	   //后验估计
+	Kalman.Q_bias_y += Kalman.K_1_y * Kalman.Angle_err_y;	 //后验估计
+	return Kalman.angle_y;
 }

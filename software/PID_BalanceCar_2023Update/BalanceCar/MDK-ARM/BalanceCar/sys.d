@@ -39,8 +39,8 @@ balancecar\sys.o: D:\Keil\ARM\ARMCC\Bin\..\include\stdio.h
 balancecar\sys.o: ..\..\Core\Inc\gpio.h
 balancecar\sys.o: ..\..\System\Inc\delay.h
 balancecar\sys.o: ..\..\App\Inc\control.h
-balancecar\sys.o: ..\..\App\Inc\DataScope_DP.h
 balancecar\sys.o: ..\..\App\Inc\filter.h
+balancecar\sys.o: ..\..\App\Inc\pid.h
 balancecar\sys.o: ..\..\App\Inc\inv_mpu.h
 balancecar\sys.o: ..\..\App\Inc\inv_mpu_dmp_motion_driver.h
 balancecar\sys.o: ..\..\App\Inc\mpu6050.h

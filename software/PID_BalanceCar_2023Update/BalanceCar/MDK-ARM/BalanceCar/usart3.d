@@ -40,8 +40,8 @@ balancecar\usart3.o: D:\Keil\ARM\ARMCC\Bin\..\include\stdio.h
 balancecar\usart3.o: ..\..\Core\Inc\gpio.h
 balancecar\usart3.o: ..\..\System\Inc\delay.h
 balancecar\usart3.o: ..\..\App\Inc\control.h
-balancecar\usart3.o: ..\..\App\Inc\DataScope_DP.h
 balancecar\usart3.o: ..\..\App\Inc\filter.h
+balancecar\usart3.o: ..\..\App\Inc\pid.h
 balancecar\usart3.o: ..\..\App\Inc\inv_mpu.h
 balancecar\usart3.o: ..\..\App\Inc\inv_mpu_dmp_motion_driver.h
 balancecar\usart3.o: ..\..\App\Inc\mpu6050.h

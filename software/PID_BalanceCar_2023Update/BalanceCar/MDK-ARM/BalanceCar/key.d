@@ -40,8 +40,8 @@ balancecar\key.o: D:\Keil\ARM\ARMCC\Bin\..\include\stdio.h
 balancecar\key.o: ..\..\Core\Inc\gpio.h
 balancecar\key.o: ..\..\System\Inc\delay.h
 balancecar\key.o: ..\..\App\Inc\control.h
-balancecar\key.o: ..\..\App\Inc\DataScope_DP.h
 balancecar\key.o: ..\..\App\Inc\filter.h
+balancecar\key.o: ..\..\App\Inc\pid.h
 balancecar\key.o: ..\..\App\Inc\inv_mpu.h
 balancecar\key.o: ..\..\App\Inc\inv_mpu_dmp_motion_driver.h
 balancecar\key.o: ..\..\App\Inc\mpu6050.h

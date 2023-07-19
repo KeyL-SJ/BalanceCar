@@ -235,13 +235,8 @@ void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
   if(INT==0)
-	{
-		if(delay_flag==1)
-		{
-			delay_50++;
-			if(delay_50==10) delay_50=0,delay_flag=0;  		//给主函数提供50ms的精准延时，示波器需要50ms高精度延时
-		}
-	}
+  {
+  }
   /* USER CODE END EXTI15_10_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_12);
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */

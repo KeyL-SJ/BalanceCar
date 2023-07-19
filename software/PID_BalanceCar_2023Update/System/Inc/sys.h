@@ -87,19 +87,22 @@ void JTAG_Set(u8 mode);
 #define JTAG_SWD_DISABLE   0X02
 #define SWD_ENABLE         0X01
 #define JTAG_SWD_ENABLE    0X00	
-extern u8 Way_Angle;                                //获取角度的算法，1：四元数  2：卡尔曼  3：互补滤波 
-extern u8 Flag_front,Flag_back,Flag_Left,Flag_Right,Flag_velocity; //蓝牙遥控相关的变量
-extern u8 Flag_Stop,Flag_Show;                      //电机停止标志位和显示标志位  默认停止 显示打开
-extern int Motor_Left,Motor_Right;                  //电机PWM变量 应是Motor的 向Moto致敬	
-extern int Temperature;                             //温度变量
-extern int Voltage;                                 //电池电压采样相关的变量
-extern float Angle_Balance,Gyro_Balance,Gyro_Turn;  //平衡倾角 平衡陀螺仪 转向陀螺仪
-extern u32 Distance;                                //超声波测距
-extern u8 PID_Send; 					                      //调参相关变量
-extern u8 Flag_follow,Flag_avoid;						      	//超声波跟随、超声波壁障标志位
-extern float Acceleration_Z;                        //Z轴加速度计  
-extern volatile u8 delay_flag,delay_50;             //提供延时的变量
-extern float Balance_Kp,Balance_Kd,Velocity_Kp,Velocity_Ki,Turn_Kp,Turn_Kd;//PID参数（放大100倍）
+
+typedef struct{
+    u8 Flag_front,Flag_back,Flag_Left,Flag_Right,Flag_velocity; //蓝牙遥控相关的变量
+    u8 Flag_Stop,Flag_Show;                                     //电机停止标志位和显示标志位  默认停止 显示打开
+    int Motor_Left,Motor_Right;                                 //电机PWM变量	
+    int Temperature;                                            //温度变量
+    int Voltage;                                                //电池电压采样相关的变量
+    float Angle_Balance,Gyro_Balance,Gyro_Turn;                 //平衡倾角 平衡陀螺仪 转向陀螺仪
+    u32 Distance;                                               //超声波测距
+
+    u8 Flag_follow,Flag_avoid;						      	    //超声波跟随、超声波壁障标志位
+    float Acceleration_Z;                                       //Z轴加速度计  
+}BalanceCarTypeDef;
+
+extern BalanceCarTypeDef BalanceCar;
+
 //////////////////////////////////////////////////////////////////////////////
 //以下为汇编函数
 void WFI_SET(void);		  //执行WFI指令
@@ -114,8 +117,10 @@ void MSR_MSP(u32 addr);	//设置堆栈地址
 #include "gpio.h"
 #include "delay.h"
 #include "control.h"
-#include "DataScope_DP.h"
+
 #include "filter.h"
+#include "pid.h"
+
 #include "inv_mpu.h"
 #include "inv_mpu_dmp_motion_driver.h"
 #include "mpu6050.h"
@@ -126,8 +131,10 @@ void MSR_MSP(u32 addr);	//设置堆栈地址
 #include "led.h"
 #include "oled.h"
 #include "usart3.h"
+
 #include "dmpKey.h"
 #include "dmpmap.h"
+
 #include <math.h>
 #include <string.h> 
 #include <stdio.h>

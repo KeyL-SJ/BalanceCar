@@ -31,19 +31,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-u8 Flag_front, Flag_back, Flag_Left, Flag_Right, Flag_velocity = 2;                                             // 蓝牙遥控相关的变量
-u8 Flag_Stop = 1, Flag_Show = 0;                                                                                // 电机停止标志位和显示标志位  默认停止 显示打开
-int Motor_Left, Motor_Right;                                                                                    // 电机PWM变量
-int Temperature;                                                                                                // 温度变量
-int Voltage;                                                                                                    // 电池电压采样相关的变量
-float Angle_Balance, Gyro_Balance, Gyro_Turn;                                                                   // 平衡倾角 平衡陀螺仪 转向陀螺仪
-u32 Distance;                                                                                                   // 超声波测距
-u8 PID_Send;                                                                                                    // 调参相关变量
-u8 Flag_follow = 0, Flag_avoid = 0;                                                                             // 超声波跟随、超声波壁障标志位
-float Acceleration_Z;                                                                                           // Z轴加速度计
-volatile u8 delay_flag, delay_50;                                                                               // 提供延时的变量
-float Balance_Kp = 22500, Balance_Kd = 108, Velocity_Kp = 16000, Velocity_Ki = 80, Turn_Kp = 4200, Turn_Kd = 0; // PID参数（放大100倍）
-
+BalanceCarTypeDef BalanceCar;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -63,7 +51,7 @@ float Balance_Kp = 22500, Balance_Kd = 108, Velocity_Kp = 16000, Velocity_Ki = 8
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
+void BalanceCar_Init(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -113,15 +101,19 @@ int main(void)
     OLED_Init();                        // OLED初始化
     MPU6050_initialize();               // MPU6050初始化
     DMP_Init();                         // 初始化DMP
+    
+    kalman_filter_init();   /*!< 卡尔曼滤波参数初始化 */
+    BalanceCar_Init();      /*!< 平衡车相关参数初始化 */
+    PID_Init();             /*!< PID算法参数初始化 */
+    
     HAL_NVIC_EnableIRQ(EXTI15_10_IRQn); // 开启引脚外部中断
     /* USER CODE END 2 */
-
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
     while (1)
     {
         /* USER CODE END WHILE */
-        if (Flag_Show == 0) // 使用MiniBalance APP和OLED显示屏
+        if (BalanceCar.Flag_Show == 0) // 使用MiniBalance APP和OLED显示屏
         {
             oled_show(); // 显示屏打开
         }
@@ -175,6 +167,14 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+void BalanceCar_Init(void)
+{
+    BalanceCar.Flag_velocity = 2;
+    BalanceCar.Flag_Stop = 1;
+    BalanceCar.Flag_Show = 0;
+    BalanceCar.Flag_follow = 0;
+    BalanceCar.Flag_avoid = 0;
+}
 
 /* USER CODE END 4 */
 

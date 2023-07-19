@@ -29,150 +29,58 @@ int HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
             Voltage_Temp = Get_battery_volt(); // 读取电池电压
             Voltage_Count++;                   // 平均值计数器
             Voltage_All += Voltage_Temp;       // 多次采样累积
-            if (Voltage_Count == 100)
-                Voltage = Voltage_All / 100, Voltage_All = 0, Voltage_Count = 0; // 求平均值
+            if (Voltage_Count == 100){
+                BalanceCar.Voltage = Voltage_All / 100;
+                Voltage_All = 0;
+                Voltage_Count = 0; // 求平均值
+            }
             return 0;
         }               // 10ms控制一次
         Read_Distane(); // 获取超声波测量距离值
-        if (Flag_follow == 0 && Flag_avoid == 0)
+        if (BalanceCar.Flag_follow == 0 && BalanceCar.Flag_avoid == 0)
             Led_Flash(100); // LED闪烁;常规模式 1s改变一次指示灯的状态
-        if (Flag_follow == 1 || Flag_avoid == 1)
+        if (BalanceCar.Flag_follow == 1 || BalanceCar.Flag_avoid == 1)
             Led_Flash(0);                                     // LED常亮;超声波跟随/避障模式
         Key();                                                // 扫描按键状态 单击双击可以改变小车运行状态
-        Balance_Pwm = Balance(Angle_Balance, Gyro_Balance);   // 平衡PID控制 Gyro_Balance平衡角速度极性：前倾为正，后倾为负
+        Balance_Pwm = Balance(BalanceCar.Angle_Balance, BalanceCar.Gyro_Balance);   // 平衡PID控制 BalanceCar.Gyro_Balance平衡角速度极性：前倾为正，后倾为负
         Velocity_Pwm = Velocity(Encoder_Left, Encoder_Right); // 速度环PID控制	记住，速度反馈是正反馈，就是小车快的时候要慢下来就需要再跑快一点
-        Turn_Pwm = Turn(Gyro_Turn);                           // 转向环PID控制
+        Turn_Pwm = Turn(BalanceCar.Gyro_Turn);                           // 转向环PID控制
 
-        Motor_Left = Balance_Pwm + Velocity_Pwm + Turn_Pwm;  // 计算左轮电机最终PWM
-        Motor_Right = Balance_Pwm + Velocity_Pwm - Turn_Pwm; // 计算右轮电机最终PWM
+        BalanceCar.Motor_Left = Balance_Pwm + Velocity_Pwm + Turn_Pwm;  // 计算左轮电机最终PWM
+        BalanceCar.Motor_Right = Balance_Pwm + Velocity_Pwm - Turn_Pwm; // 计算右轮电机最终PWM
                                                              // PWM值正数使小车前进，负数使小车后退
-        Motor_Left = PWM_Limit(Motor_Left, 6900, -6900);
-        Motor_Right = PWM_Limit(Motor_Right, 6900, -6900);                       // PWM限幅
-        if (Pick_Up(Acceleration_Z, Angle_Balance, Encoder_Left, Encoder_Right)) // 检查是否小车被拿起
-            Flag_Stop = 1;                                                       // 如果被拿起就关闭电机
-        if (Put_Down(Angle_Balance, Encoder_Left, Encoder_Right))                // 检查是否小车被放下
-            Flag_Stop = 0;                                                       // 如果被放下就启动电机
+        BalanceCar.Motor_Left = PWM_Limit(BalanceCar.Motor_Left, 6900, -6900);
+        BalanceCar.Motor_Right = PWM_Limit(BalanceCar.Motor_Right, 6900, -6900);                       // PWM限幅
+        if (Pick_Up(BalanceCar.Acceleration_Z, BalanceCar.Angle_Balance, Encoder_Left, Encoder_Right)) // 检查是否小车被拿起
+            BalanceCar.Flag_Stop = 1;                                                       // 如果被拿起就关闭电机
+        if (Put_Down(BalanceCar.Angle_Balance, Encoder_Left, Encoder_Right))                // 检查是否小车被放下
+            BalanceCar.Flag_Stop = 0;                                                       // 如果被放下就启动电机
         Choose(Encoder_Left, Encoder_Right);                                     // 转动右轮选择小车模式
-        if (Turn_Off(Angle_Balance, Voltage) == 0)                               // 如果不存在异常
-            Set_Pwm(Motor_Left, Motor_Right);                                    // 赋值给PWM寄存器
+        if (Turn_Off(BalanceCar.Angle_Balance, BalanceCar.Voltage) == 0)                               // 如果不存在异常
+            Set_Pwm(BalanceCar.Motor_Left, BalanceCar.Motor_Right);                                    // 赋值给PWM寄存器
     }
     return 0;
 }
-
-/**************************************************************************
-Function: Vertical PD control
-Input   : Angle:angle；Gyro：angular velocity
-Output  : balance：Vertical control PWM
-函数功能：直立PD控制
-入口参数：Angle:角度；Gyro：角速度
-返回  值：balance：直立控制PWM
-**************************************************************************/
-int Balance(float Angle, float Gyro)
-{
-    float Angle_bias, Gyro_bias;
-    int balance;
-    Angle_bias = Middle_angle - Angle; // 求出平衡的角度中值 和机械相关
-    Gyro_bias = 0 - Gyro;
-    balance = -Balance_Kp / 100 * Angle_bias - Gyro_bias * Balance_Kd / 100; // 计算平衡控制的电机PWM  PD控制   kp是P系数 kd是D系数
-    return balance;
-}
-
-/**************************************************************************
-Function: Speed PI control
-Input   : encoder_left：Left wheel encoder reading；encoder_right：Right wheel encoder reading
-Output  : Speed control PWM
-函数功能：速度控制PWM
-入口参数：encoder_left：左轮编码器读数；encoder_right：右轮编码器读数
-返回  值：速度控制PWM
-**************************************************************************/
-// 修改前进后退速度，请修改Target_Velocity，比如，改成60就比较慢了
-int Velocity(int encoder_left, int encoder_right)
-{
-    static float velocity, Encoder_Least, Encoder_bias, Movement;
-    static float Encoder_Integral, Target_Velocity;
-    //================遥控前进后退部分====================//
-    if (Flag_follow == 1 || Flag_avoid == 1)
-        Target_Velocity = 30; // 如果进入跟随/避障模式,降低速度
-    else
-        Target_Velocity = 50;
-    if (Flag_front == 1)
-        Movement = Target_Velocity / Flag_velocity; // 收到前进信号
-    else if (Flag_back == 1)
-        Movement = -Target_Velocity / Flag_velocity; // 收到后退信号
-    else
-        Movement = 0;
-
-    //=============超声波功能（跟随/避障）==================//
-    if (Flag_follow == 1 && (Distance > 200 && Distance < 500) && Flag_Left != 1 && Flag_Right != 1) // 跟随
-        Movement = Target_Velocity / Flag_velocity;
-    if (Flag_follow == 1 && Distance < 200 && Flag_Left != 1 && Flag_Right != 1)
-        Movement = -Target_Velocity / Flag_velocity;
-    if (Flag_avoid == 1 && Distance < 450 && Flag_Left != 1 && Flag_Right != 1) // 超声波避障
-        Movement = -Target_Velocity / Flag_velocity;
-
-    //================速度PI控制器=====================//
-    Encoder_Least = 0 - (encoder_left + encoder_right); // 获取最新速度偏差=目标速度（此处为零）-测量速度（左右编码器之和）
-    Encoder_bias *= 0.86;                               // 一阶低通滤波器
-    Encoder_bias += Encoder_Least * 0.14;               // 一阶低通滤波器，减缓速度变化
-    Encoder_Integral += Encoder_bias;                   // 积分出位移 积分时间：10ms
-    Encoder_Integral = Encoder_Integral + Movement;     // 接收遥控器数据，控制前进后退
-    if (Encoder_Integral > 10000)
-        Encoder_Integral = 10000; // 积分限幅
-    if (Encoder_Integral < -10000)
-        Encoder_Integral = -10000;                                                       // 积分限幅
-    velocity = -Encoder_bias * Velocity_Kp / 100 - Encoder_Integral * Velocity_Ki / 100; // 速度控制
-    if (Turn_Off(Angle_Balance, Voltage) == 1 || Flag_Stop == 1)
-        Encoder_Integral = 0; // 电机关闭后清除积分
-    return velocity;
-}
-/**************************************************************************
-Function: Turn control
-Input   : Z-axis angular velocity
-Output  : Turn control PWM
-函数功能：转向控制
-入口参数：Z轴陀螺仪
-返回  值：转向控制PWM
-**************************************************************************/
-int Turn(float gyro)
-{
-    static float Turn_Target, turn, Turn_Amplitude = 54;
-    float Kp = Turn_Kp, Kd; // 修改转向速度，请修改Turn_Amplitude即可
-    //===================遥控左右旋转部分=================//
-    if (1 == Flag_Left)
-        Turn_Target = -Turn_Amplitude / Flag_velocity;
-    else if (1 == Flag_Right)
-        Turn_Target = Turn_Amplitude / Flag_velocity;
-    else
-        Turn_Target = 0;
-    if (1 == Flag_front || 1 == Flag_back)
-        Kd = Turn_Kd;
-    else
-        Kd = 0; // 转向的时候取消陀螺仪的纠正 有点模糊PID的思想
-    //===================转向PD控制器=================//
-    turn = Turn_Target * Kp / 100 + gyro * Kd / 100; // 结合Z轴陀螺仪进行PD控制
-    return turn;                                     // 转向环PWM右转为正，左转为负
-}
-
 /**************************************************************************
 Function: Assign to PWM register
-Input   : motor_left：Left wheel PWM；motor_right：Right wheel PWM
+Input   : BalanceCar.Motor_Left：Left wheel PWM；BalanceCar.Motor_Right：Right wheel PWM
 Output  : none
 函数功能：赋值给PWM寄存器
 入口参数：左轮PWM、右轮PWM
 返回  值：无
 **************************************************************************/
-void Set_Pwm(int motor_left, int motor_right)
+void Set_Pwm(int Motor_Left, int Motor_Right)
 {
-    if (motor_left > 0)
+    if (Motor_Left > 0)
         BIN1 = 1, BIN2 = 0; // 前进
     else
         BIN1 = 0, BIN2 = 1; // 后退
-    PWMB = myabs(motor_left);
-    if (motor_right > 0)
+    PWMB = myabs(Motor_Left);
+    if (Motor_Right > 0)
         AIN2 = 1, AIN1 = 0; // 前进
     else
         AIN2 = 0, AIN1 = 1; // 后退
-    PWMA = myabs(motor_right);
+    PWMA = myabs(Motor_Right);
 }
 /**************************************************************************
 Function: PWM limiting range
@@ -205,11 +113,11 @@ void Key(void)
     tmp = click_N_Double(50);
     if (tmp == 1)
     {
-        Flag_Stop = !Flag_Stop;
+        BalanceCar.Flag_Stop = !BalanceCar.Flag_Stop;
     } // 单击控制小车的启停
     tmp2 = Long_Press();
     if (tmp2 == 1)
-        Flag_Show = !Flag_Show; // 长按控制进入上位机模式，小车的显示停止
+        BalanceCar.Flag_Show = !BalanceCar.Flag_Show; // 长按控制进入上位机模式，小车的显示停止
 }
 /**************************************************************************
 Function: If abnormal, turn off the motor
@@ -222,9 +130,9 @@ Output  : 1：abnormal；0：normal
 u8 Turn_Off(float angle, int voltage)
 {
     u8 temp;
-    if (angle < -40 || angle > 40 || 1 == Flag_Stop || voltage < 1110) // 电池电压低于11.1V关闭电机
-    {                                                                  // 倾角大于40度关闭电机
-        temp = 1;                                                      // Flag_Stop置1，即单击控制关闭电机
+    if (angle < -40 || angle > 40 || 1 == BalanceCar.Flag_Stop || voltage < 1110) // 电池电压低于11.1V关闭电机
+    {                                                                             // 倾角大于40度关闭电机
+        temp = 1;                                                                 // BalanceCar.Flag_Stop置1，即单击控制关闭电机
         AIN1 = 0;
         AIN2 = 0;
         BIN1 = 0;
@@ -265,16 +173,16 @@ void Get_Angle(void)
         Accel_Y -= 65536; // 数据类型转换
     if (Accel_Z > 32768)
         Accel_Z -= 65536;                               // 数据类型转换
-    Gyro_Balance = -Gyro_X;                             // 更新平衡角速度
+    BalanceCar.Gyro_Balance = -Gyro_X;                             // 更新平衡角速度
     Accel_Angle_x = atan2(Accel_Y, Accel_Z) * 180 / PI; // 计算倾角，转换单位为度
     Accel_Angle_y = atan2(Accel_X, Accel_Z) * 180 / PI; // 计算倾角，转换单位为度
     Gyro_X = Gyro_X / 16.4;                             // 陀螺仪量程转换，量程±2000°/s对应灵敏度16.4，可查手册
     Gyro_Y = Gyro_Y / 16.4;                             // 陀螺仪量程转换
-    Pitch = -Kalman_Filter(Accel_Angle_x, Gyro_X); // 卡尔曼滤波
-    Roll = -Kalman_Filter(Accel_Angle_y, Gyro_Y);
-    Angle_Balance = Pitch;    // 更新平衡倾角
-    Gyro_Turn = Gyro_Z;       // 更新转向角速度
-    Acceleration_Z = Accel_Z; // 更新Z轴加速度计
+    Pitch = -Kalman_Filter_x(Accel_Angle_x, Gyro_X); // 卡尔曼滤波
+    Roll = -Kalman_Filter_y(Accel_Angle_y, Gyro_Y);
+    BalanceCar.Angle_Balance = Pitch;    // 更新平衡倾角
+    BalanceCar.Gyro_Turn = Gyro_Z;       // 更新转向角速度
+    BalanceCar.Acceleration_Z = Accel_Z; // 更新Z轴加速度计
 }
 /**************************************************************************
 Function: Absolute value function
@@ -343,7 +251,7 @@ Output  : 1：put down  0：No action
 int Put_Down(float Angle, int encoder_left, int encoder_right)
 {
     static u16 flag, count;
-    if (Flag_Stop == 0) // 防止误检
+    if (BalanceCar.Flag_Stop == 0) // 防止误检
         return 0;
     if (flag == 0)
     {
@@ -393,25 +301,25 @@ Output  : none
 void Choose(int encoder_left, int encoder_right)
 {
     static int count;
-    if (Flag_Stop == 0)
+    if (BalanceCar.Flag_Stop == 0)
         count = 0;
-    if ((Flag_Stop == 1) && (encoder_left < 10)) // 此时停止且左轮不动
+    if ((BalanceCar.Flag_Stop == 1) && (encoder_left < 10)) // 此时停止且左轮不动
     {
         count += myabs(encoder_right);
         if (count > 6 && count < 180) // 普通模式
         {
-            Flag_follow = 0;
-            Flag_avoid = 0;
+            BalanceCar.Flag_follow = 0;
+            BalanceCar.Flag_avoid = 0;
         }
         if (count > 180 && count < 360) // 避障模式
         {
-            Flag_avoid = 1;
-            Flag_follow = 0;
+            BalanceCar.Flag_avoid = 1;
+            BalanceCar.Flag_follow = 0;
         }
         if (count > 360 && count < 540) // 跟随模式
         {
-            Flag_avoid = 0;
-            Flag_follow = 1;
+            BalanceCar.Flag_avoid = 0;
+            BalanceCar.Flag_follow = 1;
         }
         if (count > 540)
             count = 0;

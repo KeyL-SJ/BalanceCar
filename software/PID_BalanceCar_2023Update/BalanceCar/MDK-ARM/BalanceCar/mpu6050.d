@@ -40,8 +40,8 @@ balancecar\mpu6050.o: D:\Keil\ARM\ARMCC\Bin\..\include\stdio.h
 balancecar\mpu6050.o: ..\..\Core\Inc\gpio.h
 balancecar\mpu6050.o: ..\..\System\Inc\delay.h
 balancecar\mpu6050.o: ..\..\App\Inc\control.h
-balancecar\mpu6050.o: ..\..\App\Inc\DataScope_DP.h
 balancecar\mpu6050.o: ..\..\App\Inc\filter.h
+balancecar\mpu6050.o: ..\..\App\Inc\pid.h
 balancecar\mpu6050.o: ..\..\App\Inc\inv_mpu.h
 balancecar\mpu6050.o: ..\..\App\Inc\inv_mpu_dmp_motion_driver.h
 balancecar\mpu6050.o: ..\..\App\Inc\mpu6050.h

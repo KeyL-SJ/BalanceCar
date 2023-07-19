@@ -40,8 +40,8 @@ balancecar\encoder.o: D:\Keil\ARM\ARMCC\Bin\..\include\stdio.h
 balancecar\encoder.o: ..\..\Core\Inc\gpio.h
 balancecar\encoder.o: ..\..\System\Inc\delay.h
 balancecar\encoder.o: ..\..\App\Inc\control.h
-balancecar\encoder.o: ..\..\App\Inc\DataScope_DP.h
 balancecar\encoder.o: ..\..\App\Inc\filter.h
+balancecar\encoder.o: ..\..\App\Inc\pid.h
 balancecar\encoder.o: ..\..\App\Inc\inv_mpu.h
 balancecar\encoder.o: ..\..\App\Inc\inv_mpu_dmp_motion_driver.h
 balancecar\encoder.o: ..\..\App\Inc\mpu6050.h

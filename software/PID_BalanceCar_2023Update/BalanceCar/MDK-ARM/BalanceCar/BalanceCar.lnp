@@ -5,6 +5,7 @@
 "balancecar\inv_mpu_dmp_motion_driver.o"
 "balancecar\mpu6050.o"
 "balancecar\show.o"
+"balancecar\pid.o"
 "balancecar\encoder.o"
 "balancecar\ioi2c.o"
 "balancecar\key.o"

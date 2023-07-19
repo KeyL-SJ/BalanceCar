@@ -40,8 +40,8 @@ balancecar\stm32f1xx_it.o: ..\..\Core\Inc\gpio.h
 balancecar\stm32f1xx_it.o: ..\..\System\Inc\delay.h
 balancecar\stm32f1xx_it.o: ..\..\System\Inc\sys.h
 balancecar\stm32f1xx_it.o: ..\..\App\Inc\control.h
-balancecar\stm32f1xx_it.o: ..\..\App\Inc\DataScope_DP.h
 balancecar\stm32f1xx_it.o: ..\..\App\Inc\filter.h
+balancecar\stm32f1xx_it.o: ..\..\App\Inc\pid.h
 balancecar\stm32f1xx_it.o: ..\..\App\Inc\inv_mpu.h
 balancecar\stm32f1xx_it.o: ..\..\App\Inc\inv_mpu_dmp_motion_driver.h
 balancecar\stm32f1xx_it.o: ..\..\App\Inc\mpu6050.h

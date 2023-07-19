@@ -475,11 +475,11 @@ ARM Macro Assembler    Page 8
               00000000 
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M3 --apcs=interw
 ork --depend=balancecar\startup_stm32f103xb.d -obalancecar\startup_stm32f103xb.
-o -ID:\Keil\KeilProject\MDKProject\Project\PID_BalanceCar_2023Update\BalanceCar
-\MDK-ARM\RTE -ID:\Keil\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include -ID:\Keil\ARM\PAC
-K\Keil\STM32F1xx_DFP\2.3.0\Device\Include --predefine="__UVISION_VERSION SETA 5
-18" --predefine="_RTE_ SETA 1" --predefine="STM32F10X_MD SETA 1" --list=startup
-_stm32f103xb.lst startup_stm32f103xb.s
+o -IE:\Resources\ÏîÄ¿Project\PID_BalanceCar\software\PID_BalanceCar_2023Update\
+BalanceCar\MDK-ARM\RTE -ID:\Keil\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include -ID:\Ke
+il\ARM\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\Include --predefine="__UVISION_VERS
+ION SETA 518" --predefine="_RTE_ SETA 1" --predefine="STM32F10X_MD SETA 1" --li
+st=startup_stm32f103xb.lst startup_stm32f103xb.s
 
 
 

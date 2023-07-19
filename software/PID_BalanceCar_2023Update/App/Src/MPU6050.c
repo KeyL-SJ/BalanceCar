@@ -305,7 +305,7 @@ Output  : none
 void DMP_Init(void)
 {
     u8 temp[1] = {0};
-    Flag_Show = 1;
+    BalanceCar.Flag_Show = 1;
     i2cRead(0x68, 0x75, 1, temp);
     printf("mpu_set_sensor complete ......\r\n");
     if (temp[0] != 0x68)
@@ -332,7 +332,7 @@ void DMP_Init(void)
         if (!mpu_set_dmp_state(1))
             printf("mpu_set_dmp_state complete ......\r\n");
     }
-    Flag_Show = 0;
+    BalanceCar.Flag_Show = 0;
 }
 /**************************************************************************
 Function: Read the attitude information of DMP in mpu6050

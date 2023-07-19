@@ -40,8 +40,8 @@ balancecar\oled.o: D:\Keil\ARM\ARMCC\Bin\..\include\stdio.h
 balancecar\oled.o: ..\..\Core\Inc\gpio.h
 balancecar\oled.o: ..\..\System\Inc\delay.h
 balancecar\oled.o: ..\..\App\Inc\control.h
-balancecar\oled.o: ..\..\App\Inc\DataScope_DP.h
 balancecar\oled.o: ..\..\App\Inc\filter.h
+balancecar\oled.o: ..\..\App\Inc\pid.h
 balancecar\oled.o: ..\..\App\Inc\inv_mpu.h
 balancecar\oled.o: ..\..\App\Inc\inv_mpu_dmp_motion_driver.h
 balancecar\oled.o: ..\..\App\Inc\mpu6050.h

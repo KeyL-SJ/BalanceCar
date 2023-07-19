@@ -10,7 +10,7 @@
 #define Reduction_Ratio  30.0			//减速比30
 #define Perimeter  210.4867 			//周长，单位mm
 
-#define Middle_angle 0
+
 #define DIFFERENCE 100
 #define INT PAin(12)   //PA12连接到MPU6050的中断引脚
 

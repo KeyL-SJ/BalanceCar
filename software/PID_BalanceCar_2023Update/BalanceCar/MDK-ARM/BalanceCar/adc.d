@@ -41,8 +41,8 @@ balancecar\adc.o: ..\..\Core\Inc\gpio.h
 balancecar\adc.o: ..\..\System\Inc\delay.h
 balancecar\adc.o: ..\..\System\Inc\sys.h
 balancecar\adc.o: ..\..\App\Inc\control.h
-balancecar\adc.o: ..\..\App\Inc\DataScope_DP.h
 balancecar\adc.o: ..\..\App\Inc\filter.h
+balancecar\adc.o: ..\..\App\Inc\pid.h
 balancecar\adc.o: ..\..\App\Inc\inv_mpu.h
 balancecar\adc.o: ..\..\App\Inc\inv_mpu_dmp_motion_driver.h
 balancecar\adc.o: ..\..\App\Inc\mpu6050.h

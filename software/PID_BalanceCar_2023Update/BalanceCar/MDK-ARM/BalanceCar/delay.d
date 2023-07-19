@@ -40,8 +40,8 @@ balancecar\delay.o: D:\Keil\ARM\ARMCC\Bin\..\include\stdio.h
 balancecar\delay.o: ..\..\Core\Inc\gpio.h
 balancecar\delay.o: ..\..\System\Inc\delay.h
 balancecar\delay.o: ..\..\App\Inc\control.h
-balancecar\delay.o: ..\..\App\Inc\DataScope_DP.h
 balancecar\delay.o: ..\..\App\Inc\filter.h
+balancecar\delay.o: ..\..\App\Inc\pid.h
 balancecar\delay.o: ..\..\App\Inc\inv_mpu.h
 balancecar\delay.o: ..\..\App\Inc\inv_mpu_dmp_motion_driver.h
 balancecar\delay.o: ..\..\App\Inc\mpu6050.h

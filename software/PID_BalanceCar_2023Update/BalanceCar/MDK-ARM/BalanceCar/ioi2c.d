@@ -40,8 +40,8 @@ balancecar\ioi2c.o: D:\Keil\ARM\ARMCC\Bin\..\include\stdio.h
 balancecar\ioi2c.o: ..\..\Core\Inc\gpio.h
 balancecar\ioi2c.o: ..\..\System\Inc\delay.h
 balancecar\ioi2c.o: ..\..\App\Inc\control.h
-balancecar\ioi2c.o: ..\..\App\Inc\DataScope_DP.h
 balancecar\ioi2c.o: ..\..\App\Inc\filter.h
+balancecar\ioi2c.o: ..\..\App\Inc\pid.h
 balancecar\ioi2c.o: ..\..\App\Inc\inv_mpu.h
 balancecar\ioi2c.o: ..\..\App\Inc\inv_mpu_dmp_motion_driver.h
 balancecar\ioi2c.o: ..\..\App\Inc\mpu6050.h
