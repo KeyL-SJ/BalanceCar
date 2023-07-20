@@ -61,7 +61,7 @@ PID算法的Simulink仿真如下：
 
 对于软件中，使用GPIO模拟I2C驱动MPU6050陀螺仪
 
-![](./image/Software/keil.png)
+![](./image/Software/Keil.png)
 
 这样可以通过封装好的I2C函数读取MPU6050传感器的数据，具体代码如下：
 
