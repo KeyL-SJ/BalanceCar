@@ -21,7 +21,7 @@
 
 ## 2、Simulink
 
-本项目中使用Matlab的Simulink对PID算法以及卡尔曼滤波进行仿真调试，Simulink文件开源在Simulink文件夹中。
+​		本项目中使用Matlab的Simulink对PID算法以及卡尔曼滤波进行仿真调试，Simulink文件开源在Simulink文件夹中。
 
 ### PID算法仿真
 
@@ -170,14 +170,20 @@ int HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 ​		PID算法数学公式如下所示：
 
+
 $$
 u(t) = K_pe(t) + K_i \int^t_0e(t)dt + K_d \frac{de(t)}{dt}
 $$
+​	
+
 ​		该公式适用于连续的模拟量信号，然而本系统中使用的传感器数据为离散的数字量信号，故而需要对公式进行离散化处理，使用一阶差分代替一阶微分、使用累加代 替积分，离散化之后的公式如下：
+
 
 $$
 u(t) = K_pe(t) + K_i \sum(t) + K_d[e(t) - e(t-1)]
 $$
+
+
 
 ### 双环控制PID算法
 
@@ -187,15 +193,21 @@ $$
 
 ​		直立环使用PD控制，用于控制小车保持直立状态。直立环的入口参数为小车当前的倾斜角度`Angle`与X轴角速度 `Gyro_X`（即为角度的微分），具体的算法实现为：计算出小车当前角度与平衡角度的偏差`Angle_bias`带入PD控制公式：
 
+
 $$
 u(t)=K_pe(t) + K_d[e(t) - e(t-1)]
 $$
 
+​	
+
 ​		可以得到直立环的PWM输出值为：
+
 
 $$
 BalancePWM = BalanceK_p \times AngleBias + BalanceK_d \times GyroX
 $$
+
+​	
 
 ​		其中`BalancePWM`为直立环比例增益；`BalanceKd`为直立环微分增益；
 
@@ -214,20 +226,31 @@ int Balance(float Angle, float Gyro)
 
 ````
 ​		速度环使用PI控制，用于控制小车的速度。速度环入口参数为小车左右电机的转 速。在平衡模式下，小车的理想状态是保持直立，并且尽量保持在原地不动，故此时 小车的目标速度为0。同时为了减小速度环对直立环的干扰，速度环的速度变化应该缓 慢且平和，故而在速度环中使用一阶低通滤波，减缓速度的变化。一阶低通滤波公式如下：
+
+
 $$
 y(n) = Kx(n) + (1-K) y (n-1)
 $$
 
+​		
+
 ​		与直立环类似，速度环也需要先求出当前的速度偏差量`Speed_bias` ，经过一阶低通滤波之后，带入PI控制公式：
+
+
 $$
 u(t) = K_pe(t) + K_i \sum e(t)
 $$
 
+​		
+
 ​		可以得到速度环的PWM输出值为：
+
 
 $$
 VelocityPWM = VelocityK_p \times VelocityBias + VelocityK_i \times \sum VelocityBias
 $$
+
+​		
 
 ​		速度环代码如下：
 
@@ -271,9 +294,13 @@ $$
 ​		
 
 我们将两个式子合并，可以得到下面公式：
+
+
 $$
 a = K_p \times v+K_d \times dv-K_p[Kp_1 \times e(k) + K_i \sum e(k)] 
 $$
+
+​		
 
 ​		a 为直接输出于小车的 PWM。观察式子可以知道，这个串级 PID 系统实际 上是由一个 PD 控制器和一个 PI 控制器组成，我们可以分拆优化为两个控制环分别叠加到电机 PWM 上。
 
