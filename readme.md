@@ -262,6 +262,7 @@ int Velocity(int encoder_left, int encoder_right)
 
 ​		假如速度环输出为`v`，作为目标角度输出直立环，直立环的输出`a`直接作用于电机，使小车产生一个倾角，那么由如下关系：
 
+
 $$
 a=K_p \times (v - v_1) + K_d \times dv
 
@@ -272,8 +273,9 @@ $$
 v_1 = K_p \times e(k) + K_i \times \sum e(k)
 $$
 
-​		我们将两个式子合并，可以得到下面公式：
+​		
 
+我们将两个式子合并，可以得到下面公式：
 $$
 a = K_p \times v+K_d \times dv-K_p[Kp_1 \times e(k) + K_i \sum e(k)] 
 $$
