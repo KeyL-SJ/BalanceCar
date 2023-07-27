@@ -194,6 +194,7 @@ $$
 ​		直立环使用PD控制，用于控制小车保持直立状态。直立环的入口参数为小车当前的倾斜角度`Angle`与X轴角速度 `Gyro_X`（即为角度的微分），具体的算法实现为：计算出小车当前角度与平衡角度的偏差`Angle_bias`带入PD控制公式：
 
 
+
 $$
 u(t)=K_pe(t) + K_d[e(t) - e(t-1)]
 $$
@@ -203,11 +204,10 @@ $$
 ​		可以得到直立环的PWM输出值为：
 
 
+
 $$
 BalancePWM = BalanceK_p \times AngleBias + BalanceK_d \times GyroX
 $$
-
-​	
 
 ​		其中`BalancePWM`为直立环比例增益；`BalanceKd`为直立环微分增益；
 
@@ -278,6 +278,7 @@ int Velocity(int encoder_left, int encoder_right)
 ![双环控制PID](./image/Software/双环控制PID.png)
 
 ​		假如速度环输出为`v`，作为目标角度输出直立环，直立环的输出`a`直接作用于电机，使小车产生一个倾角，那么由如下关系：
+
 
 
 
