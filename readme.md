@@ -171,6 +171,7 @@ int HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 ​		PID算法数学公式如下所示：
 
 
+
 $$
 u(t) = K_pe(t) + K_i \int^t_0e(t)dt + K_d \frac{de(t)}{dt}
 $$
@@ -284,15 +285,13 @@ int Velocity(int encoder_left, int encoder_right)
 
 $$
 a=K_p \times (v - v_1) + K_d \times dv
-
-a=K_p \times(v-v_1)+K_d \times dv
 $$
 
 $$
 v_1 = K_p \times e(k) + K_i \times \sum e(k)
 $$
 
-​		
+​	
 
 我们将两个式子合并，可以得到下面公式：
 
