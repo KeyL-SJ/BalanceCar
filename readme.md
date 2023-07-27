@@ -164,3 +164,109 @@ int HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 }
 ````
 
+### PID算法概念
+
+​		PID算法是工业应用中最广泛算法之一，在闭环系统的控制中，可自动对控制系统进行准确且迅速的校正。PID算法已经有100多年历史，在四轴飞行器，平衡小车、汽车定速巡航、温度控制器等场景均有应用。
+
+​		PID算法数学公式如下所示：
+$$
+u(t) = K_pe(t) + K_i\int^t_0e(t)dt + K_d\frac{de(t)}{dt}
+$$
+​		该公式适用于连续的模拟量信号，然而本系统中使用的传感器数据为离散的数字量信号，故而需要对公式进行离散化处理，使用一阶差分代替一阶微分、使用累加代 替积分，离散化之后的公式如下：
+$$
+u(t) = K_pe(t) + K_i\sum(t) + K_d[e(t) - e(t-1)]
+$$
+
+### 双环控制PID算法
+
+​		在比较复杂的系统之中，普通的PID算法可能不能满足系统的需求，在工业控制中，对于复杂的系统，常见的方法是使用多环控制的PID算法。针对基于PID的智能自平衡小车，最常见的方法就是使用双环控制的PID算法。
+
+​		在智能自平衡车的双环控制PID算法中，包含直立环和速度环可实现小车在原地保持平衡状态，若小车需要转向，也可以再加入转向环，本文主要详细讲述直立环和速度环的双环控制。
+
+​		直立环使用PD控制，用于控制小车保持直立状态。直立环的入口参数为小车当前的倾斜角度`Angle`与X轴角速度 `Gyro_X`（即为角度的微分），具体的算法实现为：计算出小车当前角度与平衡角度的偏差`Angle_bias`带入PD控制公式：
+$$
+u(t)=K_pe(t)+K_d[e(t)-e(t-1)]
+$$
+可以得到直立环的PWM输出值为：
+$$
+BalancePWM = BalanceK_p\times AngleBias + BalanceK_d\times GyroX
+$$
+其中`BalancePWM`为直立环比例增益；`BalanceKd`为直立环微分增益；
+
+直立环代码如下：
+
+````c
+int Balance(float Angle, float Gyro)
+{
+    float Angle_bias, Gyro_bias;
+    int balance;
+    Angle_bias = Middle_angle - Angle; // 求出平衡的角度中值 和机械相关
+    Gyro_bias = 0 - Gyro;
+    balance = -PID.Balance_Kp / 100 * Angle_bias - Gyro_bias * PID.Balance_Kd / 100; // 计算平衡控制的电机PWM
+    return balance;
+}
+
+````
+
+
+
+​		速度环使用PI控制，用于控制小车的速度。速度环入口参数为小车左右电机的转 速。在平衡模式下，小车的理想状态是保持直立，并且尽量保持在原地不动，故此时 小车的目标速度为0。同时为了减小速度环对直立环的干扰，速度环的速度变化应该缓 慢且平和，故而在速度环中使用一阶低通滤波，减缓速度的变化。一阶低通滤波公式如下：
+$$
+y(n)=Kx(n)+(1-K)y(n-1)
+$$
+​		与直立环类似，速度环也需要先求出当前的速度偏差量`Speed_bias` ，经过一阶低通滤波之后，带入PI控制公式：
+$$
+u(t)=K_pe(t)+K_i \sum e(t)
+$$
+可以得到速度环的PWM输出值为：
+$$
+VelocityPWM = VelocityK_p \times VelocityBias + VelocityK_i \times \sum VelocityBias
+$$
+速度环代码如下：
+
+````c
+int Velocity(int encoder_left, int encoder_right)
+{
+    Encoder_Least = 0 - (encoder_left + encoder_right); 
+    Encoder_bias *= 0.86;                 // 一阶低通滤波器
+    Encoder_bias += Encoder_Least * 0.14; // 一阶低通滤波器，减缓速度变化
+    Encoder_Integral += Encoder_bias;     // 积分出位移 积分时间：10ms
+    Encoder_Integral = Encoder_Integral + Movement;// 接收遥控器数据，控制前进后退
+    if (Encoder_Integral > 10000)
+        Encoder_Integral = 10000; // 积分限幅
+    if (Encoder_Integral < -10000)
+        Encoder_Integral = -10000;                                                               // 积分限幅
+    velocity = -Encoder_bias * PID.Velocity_Kp / 100 - Encoder_Integral * PID.Velocity_Ki / 100; // 速度控制
+    if (Turn_Off(BalanceCar.Angle_Balance, BalanceCar.Voltage) == 1 || BalanceCar.Flag_Stop == 1)
+        Encoder_Integral = 0; // 电机关闭后清除积分
+    return velocity;
+}
+````
+
+​		
+
+如果小车出现倾角，在直立控制的作用下就会使小车在倾斜的方向加速，我们可以利用小车的这个特性来进行速度控制。**控制速度实际上就变成了控制小车的倾角。**
+
+​		车轮的速度可以通过读取编码器数值来获得。小车的速度控制对快速性要求并不高，但是对于准确性有一定的要求。PID 控制中微分(Didderential)控制 主要的作用是减少振荡，加快稳定速度，积分(Intergral)控制主要的作用是减少静态误差，所以我们可以建立速度 PI 闭环控制。
+
+​		
+
+​		输出一个角度使小车达到目标速度，这就是串级PID控制，**让速度环的输出作为直立环的输入，角度控制的输出直接作用于电机上。**
+
+![双环控制PID](./image/Software/双环控制PID.png)
+
+​		假如速度环输出为`v`，作为目标角度输出直立环，直立环的输出`a`直接作用于电机，使小车产生一个倾角，那么由如下关系：
+$$
+a=K_p \times(v - v_1) + K_d \times dv
+$$
+
+$$
+v_1 = K_p \times e(k)+K_i \times \sum e(k)
+$$
+
+​		我们将两个式子合并，可以得到下面公式：
+$$
+a = K_p \times v + K_d \times dv - K_p[Kp_1 \times e(k) + K_i \sum e(k)]
+$$
+​		a 为直接输出于小车的 PWM。观察式子可以知道，这个串级 PID 系统实际 上是由一个 PD 控制器和一个 PI 控制器组成，我们可以分拆优化为两个控制环分别叠加到电机 PWM 上。
+
