@@ -148,7 +148,6 @@ Function: Get angle
 Input   : way：The algorithm of getting angle 1：DMP  2：kalman  3：Complementary filtering
 Output  : none
 函数功能：获取角度
-入口参数：way：获取角度的算法 1：DMP  2：卡尔曼 3：互补滤波
 返回  值：无
 **************************************************************************/
 void Get_Angle(void)
