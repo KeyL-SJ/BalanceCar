@@ -279,8 +279,6 @@ int Velocity(int encoder_left, int encoder_right)
 ​		假如速度环输出为`v`，作为目标角度输出直立环，直立环的输出`a`直接作用于电机，使小车产生一个倾角，那么由如下关系：
 
 
-
-
 $$
 a=K_p \times (v - v_1) + K_d \times dv
 $$
@@ -289,16 +287,12 @@ $$
 v_1 = K_p \times e(k) + K_i \times \sum e(k)
 $$
 
-​	
-
 我们将两个式子合并，可以得到下面公式：
 
 
 $$
-a = K_p \times v+K_d \times dv-K_p[Kp_1 \times e(k) + K_i \sum e(k)] 
+a = K_p \times v+K_d \times dv-K_p[Kp_1 \times e(k) + K_i \sum e(k)]
 $$
-
-​		
 
 ​		a 为直接输出于小车的 PWM。观察式子可以知道，这个串级 PID 系统实际 上是由一个 PD 控制器和一个 PI 控制器组成，我们可以分拆优化为两个控制环分别叠加到电机 PWM 上。
 
