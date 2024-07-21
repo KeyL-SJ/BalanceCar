@@ -475,11 +475,9 @@ ARM Macro Assembler    Page 8
               00000000 
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M3 --apcs=interw
 ork --depend=balancecar\startup_stm32f103xb.d -obalancecar\startup_stm32f103xb.
-o -IE:\Resources\ÏîÄ¿Project\PID_BalanceCar\software\PID_BalanceCar_2023Update\
-BalanceCar\MDK-ARM\RTE -ID:\Keil\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include -ID:\Ke
-il\ARM\PACK\Keil\STM32F1xx_DFP\2.3.0\Device\Include --predefine="__UVISION_VERS
-ION SETA 518" --predefine="_RTE_ SETA 1" --predefine="STM32F10X_MD SETA 1" --li
-st=startup_stm32f103xb.lst startup_stm32f103xb.s
+o -I.\RTE\_BalanceCar -ID:\Keil\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\Core\Include --
+predefine="__UVISION_VERSION SETA 529" --predefine="_RTE_ SETA 1" --list=startu
+p_stm32f103xb.lst startup_stm32f103xb.s
 
 
 
@@ -1205,4 +1203,4 @@ Symbol: __use_two_region_memory
       None
 Comment: __use_two_region_memory unused
 3 symbols
-409 symbols in table
+408 symbols in table
